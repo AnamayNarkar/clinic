@@ -1,0 +1,16 @@
+flyway migrate
+go build && ./clinic
+sqlc generate
+go mod tidy && go mod vendor
+
+cat<<EOL > shellEnvSetupCommands.sh
+export PATH=$PATH:$(go env GOPATH)/bin
+export PATH=$PATH:"/c/PROGRA~1/Red Gate/Flyway Desktop/flyway"
+export FLYWAY_USER=<DB_USER>
+export FLYWAY_PASSWORD=<DB_PASSWORD>
+
+cat<<EOL >.env
+PORT=3000
+DATABASE_URL=postgres://<DB_USER>:<DB
+REDIS_URL=localhost:6379
+REDIS_PASS=
