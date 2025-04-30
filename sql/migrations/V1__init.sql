@@ -84,3 +84,10 @@ INSERT INTO receptionists (username, first_name, last_name, email, password_hash
 
 INSERT INTO patients (id,username,first_name, last_name, email, password_hash, salt, phone) VALUES
 ('5a91b64e-4fa2-43cf-be47-23fa7acfb4c0','pat1','patient','1','patient1@gmail.com','$2a$10$cEc62z1ZWy4cHXTPAGK7PONaCyvsDLjn5sKNmNT45IjtiC9glxlFq','8ddbc941-6958-4c10-aed3-913816d1486b','1234567890');
+
+CREATE OR REPLACE FUNCTION do_nothing()
+RETURNS void AS $$
+BEGIN
+  -- no operation
+END;
+$$ LANGUAGE plpgsql;
