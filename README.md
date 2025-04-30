@@ -9,10 +9,10 @@ The Clinic Management System is a comprehensive healthcare platform designed to 
 ### Backend
 
 - **Go (Golang)** - Main programming language
-- **Gin Web Framework** - High-performance HTTP web framework
-- **PostgreSQL** - Relational database for persistent storage
+- **Gin Web Framework** - HTTP web framework
+- **PostgreSQL** - database for persistent storage
 - **SQLC** - SQL compiler generating type-safe Go code from SQL
-- **Redis** - In-memory data structure store used for session management
+- **Redis** - Cache used for session management
 
 ### Security
 
