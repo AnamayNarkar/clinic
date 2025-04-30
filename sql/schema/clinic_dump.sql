@@ -5,7 +5,7 @@
 -- Dumped from database version 17.4 (Debian 17.4-1.pgdg120+2)
 -- Dumped by pg_dump version 17.4 (Ubuntu 17.4-1.pgdg24.04+2)
 
--- Started on 2025-04-28 17:03:22 UTC
+-- Started on 2025-04-29 04:29:02 UTC
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -24,7 +24,25 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
--- TOC entry 221 (class 1259 OID 16472)
+-- TOC entry 223 (class 1259 OID 33654)
+-- Name: admins; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.admins (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    username text NOT NULL,
+    email text NOT NULL,
+    password_hash text NOT NULL,
+    salt text NOT NULL,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.admins OWNER TO postgres;
+
+--
+-- TOC entry 221 (class 1259 OID 33609)
 -- Name: applications; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -42,7 +60,7 @@ CREATE TABLE public.applications (
 ALTER TABLE public.applications OWNER TO postgres;
 
 --
--- TOC entry 222 (class 1259 OID 16492)
+-- TOC entry 222 (class 1259 OID 33629)
 -- Name: appointments; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -63,15 +81,17 @@ CREATE TABLE public.appointments (
 ALTER TABLE public.appointments OWNER TO postgres;
 
 --
--- TOC entry 218 (class 1259 OID 16430)
+-- TOC entry 218 (class 1259 OID 33565)
 -- Name: doctors; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.doctors (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
     username text NOT NULL,
+    first_name text NOT NULL,
+    last_name text NOT NULL,
     email text NOT NULL,
-    hased_password text NOT NULL,
+    password_hash text NOT NULL,
     specialization text NOT NULL,
     salt text NOT NULL,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -82,7 +102,7 @@ CREATE TABLE public.doctors (
 ALTER TABLE public.doctors OWNER TO postgres;
 
 --
--- TOC entry 217 (class 1259 OID 16421)
+-- TOC entry 217 (class 1259 OID 33556)
 -- Name: flyway_schema_history; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -103,16 +123,17 @@ CREATE TABLE public.flyway_schema_history (
 ALTER TABLE public.flyway_schema_history OWNER TO postgres;
 
 --
--- TOC entry 220 (class 1259 OID 16458)
+-- TOC entry 220 (class 1259 OID 33593)
 -- Name: patients; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.patients (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
+    username text NOT NULL,
     first_name text NOT NULL,
     last_name text NOT NULL,
     email text NOT NULL,
-    hased_password text NOT NULL,
+    password_hash text NOT NULL,
     salt text NOT NULL,
     phone text NOT NULL,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -123,15 +144,17 @@ CREATE TABLE public.patients (
 ALTER TABLE public.patients OWNER TO postgres;
 
 --
--- TOC entry 219 (class 1259 OID 16444)
+-- TOC entry 219 (class 1259 OID 33579)
 -- Name: receptionists; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.receptionists (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
     username text NOT NULL,
+    first_name text NOT NULL,
+    last_name text NOT NULL,
     email text NOT NULL,
-    hased_password text NOT NULL,
+    password_hash text NOT NULL,
     salt text NOT NULL,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
@@ -141,7 +164,34 @@ CREATE TABLE public.receptionists (
 ALTER TABLE public.receptionists OWNER TO postgres;
 
 --
--- TOC entry 3267 (class 2606 OID 16481)
+-- TOC entry 3280 (class 2606 OID 33667)
+-- Name: admins admins_email_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.admins
+    ADD CONSTRAINT admins_email_key UNIQUE (email);
+
+
+--
+-- TOC entry 3282 (class 2606 OID 33663)
+-- Name: admins admins_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.admins
+    ADD CONSTRAINT admins_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3284 (class 2606 OID 33665)
+-- Name: admins admins_username_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.admins
+    ADD CONSTRAINT admins_username_key UNIQUE (username);
+
+
+--
+-- TOC entry 3276 (class 2606 OID 33618)
 -- Name: applications applications_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -150,7 +200,7 @@ ALTER TABLE ONLY public.applications
 
 
 --
--- TOC entry 3269 (class 2606 OID 16501)
+-- TOC entry 3278 (class 2606 OID 33638)
 -- Name: appointments appointments_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -159,7 +209,7 @@ ALTER TABLE ONLY public.appointments
 
 
 --
--- TOC entry 3249 (class 2606 OID 16443)
+-- TOC entry 3256 (class 2606 OID 33578)
 -- Name: doctors doctors_email_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -168,7 +218,7 @@ ALTER TABLE ONLY public.doctors
 
 
 --
--- TOC entry 3251 (class 2606 OID 16439)
+-- TOC entry 3258 (class 2606 OID 33574)
 -- Name: doctors doctors_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -177,7 +227,7 @@ ALTER TABLE ONLY public.doctors
 
 
 --
--- TOC entry 3253 (class 2606 OID 16441)
+-- TOC entry 3260 (class 2606 OID 33576)
 -- Name: doctors doctors_username_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -186,7 +236,7 @@ ALTER TABLE ONLY public.doctors
 
 
 --
--- TOC entry 3246 (class 2606 OID 16428)
+-- TOC entry 3253 (class 2606 OID 33563)
 -- Name: flyway_schema_history flyway_schema_history_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -195,7 +245,7 @@ ALTER TABLE ONLY public.flyway_schema_history
 
 
 --
--- TOC entry 3261 (class 2606 OID 16469)
+-- TOC entry 3268 (class 2606 OID 33606)
 -- Name: patients patients_email_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -204,7 +254,7 @@ ALTER TABLE ONLY public.patients
 
 
 --
--- TOC entry 3263 (class 2606 OID 16471)
+-- TOC entry 3270 (class 2606 OID 33608)
 -- Name: patients patients_phone_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -213,7 +263,7 @@ ALTER TABLE ONLY public.patients
 
 
 --
--- TOC entry 3265 (class 2606 OID 16467)
+-- TOC entry 3272 (class 2606 OID 33602)
 -- Name: patients patients_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -222,7 +272,16 @@ ALTER TABLE ONLY public.patients
 
 
 --
--- TOC entry 3255 (class 2606 OID 16457)
+-- TOC entry 3274 (class 2606 OID 33604)
+-- Name: patients patients_username_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.patients
+    ADD CONSTRAINT patients_username_key UNIQUE (username);
+
+
+--
+-- TOC entry 3262 (class 2606 OID 33592)
 -- Name: receptionists receptionists_email_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -231,7 +290,7 @@ ALTER TABLE ONLY public.receptionists
 
 
 --
--- TOC entry 3257 (class 2606 OID 16453)
+-- TOC entry 3264 (class 2606 OID 33588)
 -- Name: receptionists receptionists_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -240,7 +299,7 @@ ALTER TABLE ONLY public.receptionists
 
 
 --
--- TOC entry 3259 (class 2606 OID 16455)
+-- TOC entry 3266 (class 2606 OID 33590)
 -- Name: receptionists receptionists_username_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -249,7 +308,7 @@ ALTER TABLE ONLY public.receptionists
 
 
 --
--- TOC entry 3247 (class 1259 OID 16429)
+-- TOC entry 3254 (class 1259 OID 33564)
 -- Name: flyway_schema_history_s_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -257,7 +316,7 @@ CREATE INDEX flyway_schema_history_s_idx ON public.flyway_schema_history USING b
 
 
 --
--- TOC entry 3270 (class 2606 OID 16487)
+-- TOC entry 3285 (class 2606 OID 33624)
 -- Name: applications applications_doctor_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -266,7 +325,7 @@ ALTER TABLE ONLY public.applications
 
 
 --
--- TOC entry 3271 (class 2606 OID 16482)
+-- TOC entry 3286 (class 2606 OID 33619)
 -- Name: applications applications_patient_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -275,7 +334,7 @@ ALTER TABLE ONLY public.applications
 
 
 --
--- TOC entry 3272 (class 2606 OID 16512)
+-- TOC entry 3287 (class 2606 OID 33649)
 -- Name: appointments appointments_application_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -284,7 +343,7 @@ ALTER TABLE ONLY public.appointments
 
 
 --
--- TOC entry 3273 (class 2606 OID 16507)
+-- TOC entry 3288 (class 2606 OID 33644)
 -- Name: appointments appointments_doctor_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -293,7 +352,7 @@ ALTER TABLE ONLY public.appointments
 
 
 --
--- TOC entry 3274 (class 2606 OID 16502)
+-- TOC entry 3289 (class 2606 OID 33639)
 -- Name: appointments appointments_patient_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -301,7 +360,7 @@ ALTER TABLE ONLY public.appointments
     ADD CONSTRAINT appointments_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.patients(id) ON DELETE CASCADE;
 
 
--- Completed on 2025-04-28 17:03:29 UTC
+-- Completed on 2025-04-29 04:30:56 UTC
 
 --
 -- PostgreSQL database dump complete

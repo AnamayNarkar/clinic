@@ -1,7 +1,6 @@
 package security
 
 import (
-	"clinic/sqlc"
 	"log"
 
 	"clinic/src/entity"
@@ -10,50 +9,143 @@ import (
 )
 
 var RolePermissions = map[string]map[string]map[string]bool{
-	"doctor": {
+
+	"admin": {
 		"doctor": {
-			"create":false,
-			"read":  true,	
-			"update":true,
-			"delete":false,
-		},
-		"receptionist": {
-			"create":false,
-			"read":  false,
-			"update":false,
-			"delete":false,
+			"read":   true,
+			"create": true,
+			"update": true,
+			"delete": true,
 		},
 		"patient": {
-			"create":false,
-			"read":  false,
-			"update":false,
-			"delete":false,
+			"read":   true,
+			"create": true,
+			"update": true,
+			"delete": true,
 		},
-		"appointment": {
-			"create":false,
-			"read":  true,
-			"update":true,
-			"delete":true,
+		"receptionist": {
+			"read":   true,
+			"create": true,
+			"update": true,
+			"delete": true,
 		},
 		"application": {
-			"create":false,
-			"read":  false,
-			"update":false,
-			"delete":false,
-		}
+			"read":   true,
+			"create": true,
+			"update": true,
+			"delete": true,
+		},
+		"appointment": {
+			"read":   true,
+			"create": true,
+			"update": true,
+			"delete": true,
+		},
+	},
 
-		// contniue and make for patient and receptionist
-		//receptionist can read application and create appointment
-		//patient can read and create and update application and read appointment
-		//doctor can read and create and update appointment and cant do shit with application
-	}
+	"doctor": {
+		"doctor": {
+			"read":   true,
+			"create": false,
+			"update": true,
+			"delete": false,
+		},
+		"patient": {
+			"read":   false,
+			"create": false,
+			"update": false,
+			"delete": false,
+		},
+		"receptionist": {
+			"read":   false,
+			"create": false,
+			"update": false,
+			"delete": false,
+		},
+		"application": {
+			"read":   false,
+			"create": false,
+			"update": false,
+			"delete": false,
+		},
+		"appointment": {
+			"read":   true,
+			"create": false,
+			"update": true,
+			"delete": true,
+		},
+	},
+	"receptionist": {
+		"doctor": {
+			"read":   false,
+			"create": false,
+			"update": false,
+			"delete": false,
+		},
+		"patient": {
+			"read":   true,
+			"create": true,
+			"update": true,
+			"delete": false,
+		},
+		"receptionist": {
+			"read":   true,
+			"create": false,
+			"update": true,
+			"delete": false,
+		},
+		"application": {
+			"read":   true,
+			"create": false,
+			"update": true,
+			"delete": false,
+		},
+		"appointment": {
+			"read":   true,
+			"create": true,
+			"update": false,
+			"delete": true,
+		},
+	},
+	"patient": {
+		"doctor": {
+			"read":   false,
+			"create": false,
+			"update": false,
+			"delete": false,
+		},
+		"patient": {
+			"read":   true,
+			"create": false,
+			"update": true,
+			"delete": false,
+		},
+		"receptionist": {
+			"read":   false,
+			"create": false,
+			"update": false,
+			"delete": false,
+		},
+		"application": {
+			"read":   true,
+			"create": true,
+			"update": true,
+			"delete": false,
+		},
+		"appointment": {
+			"read":   true,
+			"create": false,
+			"update": false,
+			"delete": false,
+		},
+	},
 }
 
 type SecurityManager struct {
 	RolePermissions map[string]map[string]map[string]bool
 }
 
-func NewSecurityManager(db *sqlc.Queries) *SecurityManager {
+func NewSecurityManager() *SecurityManager {
 	return &SecurityManager{
 		RolePermissions: RolePermissions,
 	}
@@ -64,13 +156,12 @@ func (sm *SecurityManager) CheckPermission(sve *entity.SessionValueEntity, targe
 	role := sve.Role
 
 	// Get permissions for this target
-	targetPermissions, exists := role[target]
+	targetPermissions, exists := sm.RolePermissions[sve.Role][target]
 	if !exists {
 		log.Printf("Target %s not found for role: %s", target, role)
 		return false
 	}
 
-	// Get permission for this action
 	permission, exists := targetPermissions[action]
 	if !exists {
 		log.Printf("Action %s not found for target %s in role: %s", action, target, role)
@@ -81,7 +172,7 @@ func (sm *SecurityManager) CheckPermission(sve *entity.SessionValueEntity, targe
 }
 
 // PermissionMiddleware creates a middleware for checking permissions in Gin HTTP handlers
-func (sm *SecurityManager) GeneralPermissionMiddleware(target string, action string, relatedData interface{}) gin.HandlerFunc {
+func (sm *SecurityManager) GeneralPermissionMiddleware(target string, action string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Get session from context
 		session, exists := c.Get("session")
@@ -103,7 +194,7 @@ func (sm *SecurityManager) GeneralPermissionMiddleware(target string, action str
 
 		// Check permission
 		if !sm.CheckPermission(sve, target, action) {
-			log.Printf("Permission denied for user with RoleID: %d on target: %s action: %s", sve.Role, target, action)
+			log.Printf("Permission denied for user with RoleID: %s on target: %s action: %s", sve.Role, target, action)
 			c.JSON(403, gin.H{"error": "Permission denied"})
 			c.Abort()
 			return

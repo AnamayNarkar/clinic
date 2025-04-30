@@ -2,8 +2,11 @@ package middleware
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
+	"log"
 	"time"
+
+	"clinic/src/entity"
 
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
@@ -13,7 +16,7 @@ func GetSession(redisClient *redis.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		session, err := c.Cookie("session_id")
 		if err != nil {
-			c.JSON(400, gin.H{"error": "Session is required from middleware"})
+			c.JSON(401, gin.H{"error": "Session is required"})
 			c.Abort()
 			return
 		}
@@ -22,14 +25,24 @@ func GetSession(redisClient *redis.Client) gin.HandlerFunc {
 		defer cancel()
 
 		value, err := redisClient.Get(ctx, session).Result()
-		fmt.Println(value)
 		if err != nil {
-			c.JSON(400, gin.H{"error": "Invalid session"})
+			c.JSON(401, gin.H{"error": "Invalid session"})
 			c.Abort()
 			return
 		}
 
-		c.Set("session", value)
+		// Deserialize session data
+		var sessionEntity entity.SessionValueEntity
+		err = json.Unmarshal([]byte(value), &sessionEntity)
+		if err != nil {
+			log.Printf("Error deserializing session: %v", err)
+			c.JSON(500, gin.H{"error": "Internal server error"})
+			c.Abort()
+			return
+		}
+
+		// Add session entity to context
+		c.Set("session", &sessionEntity)
 		c.Next()
 	}
 }

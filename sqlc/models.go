@@ -5,15 +5,92 @@
 package sqlc
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
 )
 
-type User struct {
-	ID        uuid.UUID `json:"id"`
-	Username  string    `json:"username"`
-	Password  string    `json:"password"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+type Admin struct {
+	ID           uuid.UUID `json:"id"`
+	Username     string    `json:"username"`
+	Email        string    `json:"email"`
+	PasswordHash string    `json:"password_hash"`
+	Salt         string    `json:"salt"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
+}
+
+type Application struct {
+	ID          uuid.UUID      `json:"id"`
+	PatientID   uuid.UUID      `json:"patient_id"`
+	DoctorID    uuid.UUID      `json:"doctor_id"`
+	Status      string         `json:"status"`
+	Description sql.NullString `json:"description"`
+	CreatedAt   time.Time      `json:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at"`
+}
+
+type Appointment struct {
+	ID                 uuid.UUID      `json:"id"`
+	PatientID          uuid.UUID      `json:"patient_id"`
+	DoctorID           uuid.UUID      `json:"doctor_id"`
+	ApplicationID      uuid.UUID      `json:"application_id"`
+	TimeOfAppointment  time.Time      `json:"time_of_appointment"`
+	Status             string         `json:"status"`
+	Description        sql.NullString `json:"description"`
+	CreatedAt          time.Time      `json:"created_at"`
+	UpdatedAt          time.Time      `json:"updated_at"`
+	AppointmentResults []byte         `json:"appointment_results"`
+}
+
+type Doctor struct {
+	ID             uuid.UUID `json:"id"`
+	Username       string    `json:"username"`
+	FirstName      string    `json:"first_name"`
+	LastName       string    `json:"last_name"`
+	Email          string    `json:"email"`
+	PasswordHash   string    `json:"password_hash"`
+	Specialization string    `json:"specialization"`
+	Salt           string    `json:"salt"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
+}
+
+type FlywaySchemaHistory struct {
+	InstalledRank int32          `json:"installed_rank"`
+	Version       sql.NullString `json:"version"`
+	Description   string         `json:"description"`
+	Type          string         `json:"type"`
+	Script        string         `json:"script"`
+	Checksum      sql.NullInt32  `json:"checksum"`
+	InstalledBy   string         `json:"installed_by"`
+	InstalledOn   time.Time      `json:"installed_on"`
+	ExecutionTime int32          `json:"execution_time"`
+	Success       bool           `json:"success"`
+}
+
+type Patient struct {
+	ID           uuid.UUID `json:"id"`
+	Username     string    `json:"username"`
+	FirstName    string    `json:"first_name"`
+	LastName     string    `json:"last_name"`
+	Email        string    `json:"email"`
+	PasswordHash string    `json:"password_hash"`
+	Salt         string    `json:"salt"`
+	Phone        string    `json:"phone"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
+}
+
+type Receptionist struct {
+	ID           uuid.UUID `json:"id"`
+	Username     string    `json:"username"`
+	FirstName    string    `json:"first_name"`
+	LastName     string    `json:"last_name"`
+	Email        string    `json:"email"`
+	PasswordHash string    `json:"password_hash"`
+	Salt         string    `json:"salt"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }

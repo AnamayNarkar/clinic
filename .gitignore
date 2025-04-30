@@ -3,3 +3,4 @@ shellEnvSetupCommands.sh
 *.env
 *.log
 vendor/
+clinic

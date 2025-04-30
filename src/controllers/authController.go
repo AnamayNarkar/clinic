@@ -14,6 +14,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthController struct {
@@ -67,57 +68,94 @@ func (ac *AuthController) CreateSession(
 }
 
 func (ac *AuthController) Login(c *gin.Context) {
-	requestBody := dto.UsernameAndPasswordDto{}
-	err := json.NewDecoder(c.Request.Body).Decode(&requestBody)
-	if err != nil {
+	role := c.Param("role")
+
+	requestBody := dto.UsernameAndPasswordDTO{}
+	if err := c.ShouldBindJSON(&requestBody); err != nil {
 		c.JSON(400, gin.H{"error": "invalid request body"})
 		return
 	}
 
-	user, err := ac.DB.GetUser(c, requestBody.Username)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			c.JSON(401, gin.H{"error": "invalid credentials"})
-			return
-		} else {
-			c.JSON(500, gin.H{"error": "internal server error"})
-			return
+	var userID uuid.UUID
+	var username string
+	var passwordHash string
+	var salt string
+
+	switch role {
+	case "doctor":
+		doctor, err := ac.DB.GetDoctorByUsername(c, requestBody.Username)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				c.JSON(401, gin.H{"error": "invalid credentials"})
+				return
+			} else {
+				c.JSON(500, gin.H{"error": "internal server error"})
+				return
+			}
 		}
+		userID = doctor.ID
+		username = doctor.Username
+		passwordHash = doctor.PasswordHash
+		salt = doctor.Salt
+	case "admin":
+		admin, err := ac.DB.GetAdminByUsername(c, requestBody.Username)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				c.JSON(401, gin.H{"error": "invalid credentials"})
+				return
+			} else {
+				c.JSON(500, gin.H{"error": "internal server error"})
+				return
+			}
+		}
+		userID = admin.ID
+		username = admin.Username
+		passwordHash = admin.PasswordHash
+		salt = admin.Salt
+	case "receptionist":
+		receptionist, err := ac.DB.GetReceptionistByUsername(c, requestBody.Username)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				c.JSON(401, gin.H{"error": "invalid credentials"})
+				return
+			} else {
+				c.JSON(500, gin.H{"error": "internal server error"})
+				return
+			}
+		}
+		userID = receptionist.ID
+		username = receptionist.Username
+		passwordHash = receptionist.PasswordHash
+		salt = receptionist.Salt
+	case "patient":
+		patient, err := ac.DB.GetPatientByUsername(c, requestBody.Username)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				c.JSON(401, gin.H{"error": "invalid credentials"})
+				return
+			} else {
+				c.JSON(500, gin.H{"error": "internal server error"})
+				return
+			}
+		}
+		userID = patient.ID
+		username = patient.Username
+		passwordHash = patient.PasswordHash
+		salt = patient.Salt
+	default:
+		c.JSON(400, gin.H{"error": "invalid role"})
+		return
 	}
 
-	if user.Password != requestBody.Password {
+	if bcrypt.CompareHashAndPassword([]byte(passwordHash+salt), []byte(requestBody.Password)) != nil {
 		c.JSON(401, gin.H{"error": "invalid credentials"})
 		return
 	}
 
-	ac.CreateSession(user.ID, user.Username, c)
+	ac.CreateSession(userID, username, c)
 
 	c.JSON(200, gin.H{"message": "login successful"})
-}
 
-func (ac *AuthController) Register(c *gin.Context) {
-	requestBody := dto.UsernameAndPasswordDto{}
-	err := json.NewDecoder(c.Request.Body).Decode(&requestBody)
-	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid request body"})
-		return
-	}
-
-	newUser := sqlc.CreateUserParams{
-		ID:        uuid.New(),
-		Username:  requestBody.Username,
-		Password:  requestBody.Password,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-	}
-
-	_, err2 := ac.DB.CreateUser(c, newUser)
-	if err2 != nil {
-		c.JSON(500, gin.H{"error": "internal server error"})
-		return
-	}
-
-	c.JSON(201, gin.H{"message": "user registered successfully"})
 }
 
 func (ac *AuthController) Logout(c *gin.Context) {
