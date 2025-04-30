@@ -18,21 +18,6 @@ The Clinic Management System is a comprehensive healthcare platform designed to 
 
 - **ABAC (Attribute-Based Access Control)** - For fine-grained authorization
 
-### Development Tools
-
-- **Go Modules** - For dependency management
-- **Docker** - For containerization and deployment
-- **Git** - For version control
-
-## System Architecture
-
-The system follows a clean, layered architecture design:
-
-1. **Presentation Layer**: HTTP handlers using the Gin framework
-2. **Controller Layer**: Business logic handlers
-3. **Data Access Layer**: SQLC-generated code for database operations
-4. **Database Layer**: PostgreSQL with proper schema design
-
 ### Key Components
 
 #### 1. User Management
