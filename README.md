@@ -13,15 +13,10 @@ The Clinic Management System is a comprehensive healthcare platform designed to 
 - **PostgreSQL** - Relational database for persistent storage
 - **SQLC** - SQL compiler generating type-safe Go code from SQL
 - **Redis** - In-memory data structure store used for session management
-- **Flyway** - Database migration tool
-- **UUID** - For generating unique identifiers
-- **bcrypt** - For secure password hashing
 
 ### Security
 
-- **JSON Web Tokens (JWT)** - For secure authentication
 - **ABAC (Attribute-Based Access Control)** - For fine-grained authorization
-- **bcrypt** with salt - For secure password storage
 
 ### Development Tools
 
